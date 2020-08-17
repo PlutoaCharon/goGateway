@@ -8,7 +8,6 @@ import (
 	"github.com/PlutoaCharon/goGateway/public"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/gin"
-	"time"
 )
 
 type ServiceController struct {
@@ -17,8 +16,8 @@ type ServiceController struct {
 //ServiceControllerRegister admin路由注册
 func ServiceRegister(router *gin.RouterGroup) {
 	admin := ServiceController{}
-	router.GET("/service_list", admin.ServiceList)
-
+	router.GET("/service_list", admin.ServiceList)     // 列出服务列表具体信息
+	router.GET("/service_delete", admin.ServiceDelete) // 删除指定ID号服务信息
 }
 
 // ServiceList godoc
@@ -31,7 +30,7 @@ func ServiceRegister(router *gin.RouterGroup) {
 // @Param info query string false "关键词"
 // @Param page_size query int true "每页个数"
 // @Param page_no query int true "当前页数"
-// @Success 200 {object} middleware.Response{data=dto.ServiceListOutput} "success"
+// @Success 200 {object} middleware.Response{data=dto.ServiceListItemOutput} "success"
 // @Router /service/service_list [get]
 func (admin *ServiceController) ServiceList(c *gin.Context) {
 	var params = &dto.ServiceListInput{}
@@ -61,10 +60,14 @@ func (admin *ServiceController) ServiceList(c *gin.Context) {
 		// 1. http后缀接入 cluserIp + cluserPort+Path
 		// 2. http域名接入 domain
 		// 3. tcp, grpc cluserIp + srevicePort
+
+		// 获取总结点数
 		totalNode := len(detail.LoadBalance.GetIPListByModel())
-		serviceCounter, _ := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + item.ServiceName)
-		qps := serviceCounter.GetQPS()
-		qpd, _ := serviceCounter.GetDayCount(time.Now())
+
+		// 获取qps， qpd
+		//serviceCounter, _ := public.FlowCounterHandler.GetCounter(public.FlowServicePrefix + item.ServiceName)
+		//qps := serviceCounter.GetQPS()
+		//qpd, _ := serviceCounter.GetDayCount(time.Now())
 
 		serviceIP := lib.GetStringConf("base.cluster.cluster_ip")
 		servicePort := lib.GetStringConf("base.cluster.cluster_port")
@@ -94,12 +97,51 @@ func (admin *ServiceController) ServiceList(c *gin.Context) {
 			ServiceDesc: item.ServiceDesc,
 			UpdatedAt:   item.UpdatedAt,
 			CreatedAt:   item.CreatedAt,
-			QPS:         qps,
-			QPD:         qpd,
+			//QPS:         qps,
+			//QPD:         qpd,
+			QPS:         0,
+			QPD:         0,
 			TotalNode:   totalNode,
 			ServiceAddr: serviceAddr,
 		})
 	}
 	middleware.ResponseSuccess(c, map[string]interface{}{"list": outputList, "total": total})
+	return
+}
+
+// ServiceDelete godoc
+// @Summary 服务列表
+// @Description 服务列表
+// @Tags 服务管理
+// @ID /service/service_delete
+// @Accept  json
+// @Produce  json
+// @Param id query string true "服务ID"
+// @Success 200 {object} middleware.Response{data=string} "success"
+// @Router /service/service_delete [get]
+func (admin *ServiceController) ServiceDelete(c *gin.Context) {
+	params := &dto.ServiceDetailInput{}
+	if err := params.GetValidParams(c); err != nil {
+		middleware.ResponseError(c, 2001, err)
+		return
+	}
+
+	// 读取服务基本信息
+	search := &dao.ServiceInfo{
+		ID: params.ID,
+	}
+
+	info, err := search.Find(c, lib.GORMDefaultPool, search)
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
+		return
+	}
+
+	info.IsDelete = 1
+	if err := info.Save(c, lib.GORMDefaultPool); err != nil {
+		middleware.ResponseError(c, 2003, err)
+		return
+	}
+	middleware.ResponseSuccess(c, "")
 	return
 }

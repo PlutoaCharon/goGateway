@@ -4,6 +4,7 @@ import (
 	"github.com/PlutoaCharon/goGateway/public"
 	"github.com/e421083458/gorm"
 	"github.com/gin-gonic/gin"
+	"strings"
 )
 
 type LoadBalance struct {
@@ -37,4 +38,16 @@ func (t *LoadBalance) Save(c *gin.Context, tx *gorm.DB) error {
 		return err
 	}
 	return nil
+}
+
+func (t *LoadBalance) GetIPListByModel() []string {
+	return strings.Split(t.IpList, ",")
+}
+
+func (t *LoadBalance) GetForbidListByModel() []string {
+	return strings.Split(t.ForbidList, ",")
+}
+
+func (t *LoadBalance) GetWeightListByModel() []string {
+	return strings.Split(t.WeightList, ",")
 }

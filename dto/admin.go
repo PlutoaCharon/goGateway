@@ -16,6 +16,8 @@ type AdminInfoOutput struct {
 	LoginTime    time.Time `json:"login_time" form:"login_time" comment:"登陆时间" en_comment:"login_time" validate:""`
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
 // 管理员登录信息输入
 type AdminLoginInput struct {
 	UserName string `json:"username" form:"username" comment:"用户名" example:"admin" validate:"required"` // 管理用户名
@@ -26,10 +28,14 @@ func (params *AdminLoginInput) GetValidParams(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
 
+//---------------------------------------------------------------------------------------------------------------
+
 // 管理员登录信息输出
 type AdminLoginOutput struct {
 	Token string `json:"token" form:"token" comment:"token" example:"token" validate:""` // token
 }
+
+//---------------------------------------------------------------------------------------------------------------
 
 // Session信息
 type AdminSession struct {
@@ -37,6 +43,8 @@ type AdminSession struct {
 	UserName  string    `json:"user_name" form:"user_name" comment:"用户名" en_comment:"user_name" validate:""`
 	LoginTime time.Time `json:"login_time" form:"login_time" comment:"登陆时间" en_comment:"login_time" validate:""`
 }
+
+//---------------------------------------------------------------------------------------------------------------
 
 // 管理员密码修改
 type AdminChangePwdInput struct {
@@ -46,3 +54,5 @@ type AdminChangePwdInput struct {
 func (params *AdminChangePwdInput) GetValidParams(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
+
+//---------------------------------------------------------------------------------------------------------------
