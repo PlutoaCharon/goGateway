@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// 服务列表信息
 type ServiceInfo struct {
 	ID          int64     `json:"id" gorm:"primary_key"`
 	LoadType    int       `json:"load_type" gorm:"column:load_type" description:"负载类型 0=http 1=tcp 2=grpc"`
@@ -18,21 +19,40 @@ type ServiceInfo struct {
 	IsDelete    int8      `json:"is_delete" gorm:"column:is_delete" description:"是否已删除；0：否；1：是"`
 }
 
+// 相关的数据库表名
 func (t *ServiceInfo) TableName() string {
 	return "gateway_service_info"
 }
 
+// 查找方法
+func (t *ServiceInfo) Find(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceInfo, error) {
+	model := &ServiceInfo{}
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
+	return model, err
+}
+
+// 保存方法
+func (t *ServiceInfo) Save(c *gin.Context, tx *gorm.DB) error {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+// 服务列表详细信息
 func (t *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *ServiceInfo) (*ServiceDetail, error) {
 	info := &ServiceInfo{}
 	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(info).Error
 	if err != nil {
 		return nil, err
 	}
-	httpRule, _ := (&HttpRule{}).Find(c, tx, (&HttpRule{ServiceID: search.ID}))
-	tcpRule, _ := (&TcpRule{}).Find(c, tx, (&TcpRule{ServiceID: search.ID}))
-	grpcRule, _ := (&GrpcRule{}).Find(c, tx, (&GrpcRule{ServiceID: search.ID}))
-	loadbalance, _ := (&LoadBalance{}).Find(c, tx, (&LoadBalance{ServiceID: search.ID}))
-	accessControl, _ := (&AccessControl{}).Find(c, tx, (&AccessControl{ServiceID: search.ID}))
+
+	httpRule, _ := (&HttpRule{}).Find(c, tx, &HttpRule{ServiceID: search.ID})
+	tcpRule, _ := (&TcpRule{}).Find(c, tx, &TcpRule{ServiceID: search.ID})
+	grpcRule, _ := (&GrpcRule{}).Find(c, tx, &GrpcRule{ServiceID: search.ID})
+	loadbalance, _ := (&LoadBalance{}).Find(c, tx, &LoadBalance{ServiceID: search.ID})
+	accessControl, _ := (&AccessControl{}).Find(c, tx, &AccessControl{ServiceID: search.ID})
+
 	detail := &ServiceDetail{
 		Info:          info,
 		HttpRule:      httpRule,
@@ -44,6 +64,7 @@ func (t *ServiceInfo) ServiceDetail(c *gin.Context, tx *gorm.DB, search *Service
 	return detail, err
 }
 
+// 分页查询方法
 func (t *ServiceInfo) ServiceList(c *gin.Context, tx *gorm.DB, params *dto.ServiceListInput) ([]ServiceInfo, int64, error) {
 	var list []ServiceInfo
 	var count int64

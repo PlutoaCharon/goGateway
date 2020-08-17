@@ -1,5 +1,11 @@
 package dao
 
+import (
+	"github.com/PlutoaCharon/goGateway/public"
+	"github.com/e421083458/gorm"
+	"github.com/gin-gonic/gin"
+)
+
 type AccessControl struct {
 	ID                int64  `json:"id" gorm:"primary_key"`
 	ServiceID         int64  `json:"service_id" gorm:"column:service_id" description:"服务id"`
@@ -13,4 +19,17 @@ type AccessControl struct {
 
 func (t *AccessControl) TableName() string {
 	return "gateway_service_access_control"
+}
+
+func (t *AccessControl) Find(c *gin.Context, tx *gorm.DB, search *AccessControl) (*AccessControl, error) {
+	model := &AccessControl{}
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
+	return model, err
+}
+
+func (t *AccessControl) Save(c *gin.Context, tx *gorm.DB) error {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
+		return err
+	}
+	return nil
 }

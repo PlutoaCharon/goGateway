@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// 搜索框输入参数
+// 搜索框查找信息参数
 type ServiceListInput struct {
 	Info     string `json:"info" form:"info" comment:"查找信息" validate:""`
 	PageSize int    `json:"page_size" form:"page_size" comment:"页数" validate:"required,min=1,max=999"`
@@ -17,6 +17,7 @@ func (params *ServiceListInput) GetValidParams(c *gin.Context) error {
 	return public.DefaultGetValidParams(c, params)
 }
 
+// 具体信息展示
 type ServiceListItemOutput struct {
 	ID          int64     `json:"id" gorm:"primary_key"`
 	LoadType    int       `json:"load_type" gorm:"column:load_type" description:"账号创建时间"`

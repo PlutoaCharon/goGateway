@@ -28,6 +28,12 @@ rotate_wf_log_path = "./logs/goGateway.wf.log.%Y%M%D%H"
 on = false
 color = false
 
+[cluster]
+cluster_ip = "127.0.0.1"
+cluster_port = 8080
+cluster_ssl_port = 8443
+cluster_realserver_ip = ["127.0.0.1"]
+
 [swagger]
 title = "goGateway swagger API"
 desc = "This is a sample server celler server."
