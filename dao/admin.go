@@ -38,14 +38,14 @@ func (o *GatewayAdmin) LoginCheck(c *gin.Context, tx *gorm.DB, params *dto.Admin
 	return adminInfo, nil
 }
 
-func (t *GatewayAdmin) Find(c *gin.Context, tx *gorm.DB, search *GatewayAdmin) (*GatewayAdmin, error) {
+func (o *GatewayAdmin) Find(c *gin.Context, tx *gorm.DB, search *GatewayAdmin) (*GatewayAdmin, error) {
 	model := &GatewayAdmin{}
 	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(search).Find(model).Error
 	return model, err
 }
 
-func (t *GatewayAdmin) Save(c *gin.Context, tx *gorm.DB) error {
-	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(t).Error; err != nil {
+func (o *GatewayAdmin) Save(c *gin.Context, tx *gorm.DB) error {
+	if err := tx.SetCtx(public.GetGinTraceContext(c)).Save(o).Error; err != nil {
 		return err
 	}
 	return nil
