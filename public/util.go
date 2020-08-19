@@ -15,3 +15,13 @@ func GenSaltPassword(passport string, salt string) string {
 	rs2 := fmt.Sprintf("%x", sOb2.Sum(nil))
 	return rs2
 }
+
+//InStringList 数组中是否存在某值
+func InStringList(t string, list []string) bool {
+	for _, s := range list {
+		if s == t {
+			return true
+		}
+	}
+	return false
+}
